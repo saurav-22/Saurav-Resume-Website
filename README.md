@@ -35,7 +35,7 @@ It is lightweight, mobile-first, auto-theme (light/dark), and deployable to AWS 
 ---
 
 ## Folder Structure
-
+```text
 /portfolio-root
 │── index.html → Main portfolio page
 │── projects.html → Full Projects listing page
@@ -43,7 +43,7 @@ It is lightweight, mobile-first, auto-theme (light/dark), and deployable to AWS 
 │── script.js → JSON loader, carousel, accordions, theme logic
 │── style.css → Small Tailwind overrides
 │── .github/workflows/deploy.yml → Auto-deploy pipeline for S3
-
+```
 ---
 
 ## How to Use This as Your Own Portfolio
@@ -76,11 +76,11 @@ Add a file named `resume.pdf` in the root folder
 
 ### Zero Install Required
 
-✅ No npm
-✅ No yarn
-✅ No npm run build
-✅ All styling handled via Tailwind CDN
-✅ Runs in any browser or static file server
+- ✅ No npm
+- ✅ No yarn
+- ✅ No npm run build
+- ✅ All styling handled via Tailwind CDN
+- ✅ Runs in any browser or static file server
 
 To preview locally:
 ```sh
@@ -122,6 +122,7 @@ AWS_SECRET_ACCESS_KEY
 ### Contributing
 Pull requests are welcome.
 
+
 Possible improvements:
 - Add multilingual support
 - Add blog support
@@ -130,9 +131,10 @@ Possible improvements:
 - Improve accessibility contrast rules
 
 ### Built By
-**Saurav Singh (QA / DevOps Engineer)**
-LinkedIn: https://www.linkedin.com/in/sauravqa/
-GitHub: https://github.com/saurav-22
+
+- **Saurav Singh (QA / DevOps Engineer)**
+- LinkedIn: https://www.linkedin.com/in/sauravqa/
+- GitHub: https://github.com/saurav-22
 
 ### Support
 If this project helps you build your portfolio, please consider starring ⭐ the repository on GitHub - it helps the project grow and shows demand.
