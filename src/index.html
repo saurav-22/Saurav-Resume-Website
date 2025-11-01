@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saurav Singh | QA / DevOps Engineer</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Default Theme: Dark -->
+  <script>
+    if (!localStorage.theme) localStorage.theme = "dark";
+    if (localStorage.theme === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+  </script>
+</head>
+
+<body class="bg-gradient-to-br from-[#1e3a8a] via-[#4338ca] to-[#6d28d9] text-white min-h-screen">
+
+  <!-- THEME TOGGLE SWITCH -->
+  <label class="theme-toggle">
+    <input type="checkbox" id="themeToggle" />
+    <span class="slider"></span>
+  </label>
+
+  <!-- HERO -->
+  <section class="section-wrapper hero" data-aos="fade-up" data-aos-delay="100">
+    <div class="hero-text">
+      <h1 class="name hover-float">
+        Saurav Singh <span class="role-inline">(QA / DevOps Engineer)</span>
+      </h1>
+
+      <p id="aboutMe" class="mb-4"></p>
+
+      <!-- CONTACT ROWS (2 rows, aligned as specified) -->
+<div class="hero-contact-row">
+  <!-- ROW 1: Email | Location -->
+  <div class="contact-row-1">
+    <div class="copy-email" id="email-copy">
+      <i data-lucide="mail"></i> <span id="email-text"></span>
+    </div>
+    <div class="location-row">
+      <i data-lucide="map-pin"></i> <span id="location-text"></span>
+    </div>
+  </div>
+
+  <!-- ROW 2: (GitHub + LinkedIn) | Medium (so Medium is under Location) -->
+  <div class="contact-row-2">
+    <div class="contact-left">
+      <a id="github-link" target="_blank"><i data-lucide="github"></i> GitHub</a>
+      <a id="linkedin-link" target="_blank"><i data-lucide="linkedin"></i> LinkedIn</a>
+    </div>
+    <div class="contact-right">
+      <a id="medium-link" target="_blank"><i data-lucide="pen"></i> Medium</a>
+    </div>
+  </div>
+</div>
+
+    <div class="hero-image">
+      <img id="profile-img" class="profile-img" alt="Profile Image" />
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="section-wrapper" data-aos="fade-up" data-aos-delay="150">
+    <h3 class="section-title">👤 Profile</h3>
+    <p id="summary"></p>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="section-wrapper" data-aos="fade-up" data-aos-delay="200">
+    <h3 class="section-title">🛠️ Skills</h3>
+
+    <div id="skills-tabs" class="skills-grid"></div>
+
+    <!-- INLINE SKILL EXPAND SLOT (dynamically injected under correct row) -->
+    <div id="skills-expand-slot"></div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="section-wrapper" data-aos="fade-up" data-aos-delay="250">
+    <h3 class="section-title">🏢 Experience</h3>
+    <div id="experience-list" class="experience-list space-y-4"></div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section-wrapper" data-aos="fade-up" data-aos-delay="300">
+    <h3 class="section-title">🚀 Projects</h3>
+
+    <div class="swiper mySwiper">
+      <div id="projects-carousel" class="swiper-wrapper"></div>
+
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+    </div>
+
+    <div class="swiper-pagination"></div>
+
+    <div class="center mt-6">
+      <a href="projects.html" class="view-all-btn smooth-link">View All Projects →</a>
+    </div>
+  </section>
+
+  <script src="./script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 800, once: true });
+    lucide.createIcons();
+  </script>
+</body>
+</html>

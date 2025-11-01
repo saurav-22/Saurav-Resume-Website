@@ -6,6 +6,11 @@ It is lightweight, mobile-first, auto-theme (light/dark), and deployable to AWS 
 
 ---
 
+<!--### Demo Link
+Live Demo: https://your-domain.com -->
+
+---
+
 ## Features
 
 - JSON-driven content (no HTML editing required)  

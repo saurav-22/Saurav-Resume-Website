@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects | Saurav Singh</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Default Theme: Dark -->
+  <script>
+    if (!localStorage.theme) localStorage.theme = "dark";
+    if (localStorage.theme === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+  </script>
+</head>
+
+<body class="bg-gradient-to-br from-[#1e3a8a] via-[#4338ca] to-[#6d28d9] text-white min-h-screen">
+
+  <!-- THEME TOGGLE SWITCH -->
+  <label class="theme-toggle">
+    <input type="checkbox" id="themeToggle" />
+    <span class="slider"></span>
+  </label>
+
+  <!-- PAGE HEADER -->
+  <header class="max-w-5xl mx-auto px-6 py-8 space-y-4">
+    <div>
+      <a href="index.html" class="view-all-btn">← Back to Portfolio</a>
+    </div>
+    <h1 class="text-2xl font-bold text-center tracking-wide">All Projects</h1>
+  </header>
+
+  <!-- PROJECT LIST -->
+  <section class="section-wrapper" data-aos="fade-up">
+    <div id="projects-list" class="projects-list space-y-6"></div>
+  </section>
+
+  <script src="./script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 800, once: true });
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>
