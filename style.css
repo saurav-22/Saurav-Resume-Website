@@ -1,0 +1,41 @@
+/* ===============================
+   Custom Styles Beyond Tailwind
+=============================== */
+
+/* Smooth carousel sliding */
+#carousel {
+  transition: transform 0.6s ease-in-out;
+}
+
+/* Hide scrollbar inside carousel */
+#carousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* Accordion smooth expand/collapse */
+.accordion-content {
+  transition: max-height 0.25s ease-out;
+}
+
+/* Light/Dark mode transition */
+html, body {
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* Click-to-copy hover effect */
+.copy-hover:hover {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+/* Prevent text selection flicker during theme switch */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile spacing fix for section gaps */
+@media (max-width: 480px) {
+  section {
+    margin-top: 2rem !important;
+  }
+}
