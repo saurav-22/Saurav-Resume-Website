@@ -1,4 +1,12 @@
 # Resume-Style Website (Vite + Tailwind)
+<p align="left">
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-5.0-646CFF?logo=vite&logoColor=white" />
+  <img alt="TailwindCSS" src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?logo=tailwindcss&logoColor=white" />
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-green.svg" />
+  <img alt="Deploy" src="https://img.shields.io/badge/Deploy-AWS_S3_+_CloudFront-FF9900?logo=amazonaws&logoColor=white" />
+  <img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-blue.svg" />
+</p>
+
 
 A fast, responsive, **resume-as-a-website** template. Built with Vite + Tailwind CSS, vanilla JS, Swiper.js (projects carousel), AOS (scroll animations), and Lucide icons. Content is driven by a single **data.json** file - no React or backend required.
 
@@ -34,7 +42,8 @@ A fast, responsive, **resume-as-a-website** template. Built with Vite + Tailwind
 - projects.html - all projects (stack of cards; no modal)
 - styles.css - Tailwind + minimal custom rules
 - script.js - loads data.json, renders sections, UI behavior
-- data.json - all portfolio content (profile, skills, experience, projects, contact)
+- public/data.json - all portfolio content (profile, skills, experience, projects, contact)
+- public/profile.jpg - profile image
 
 Optional CI/CD and S3 hosting can be added; see “Deployment” later.
 
@@ -54,7 +63,7 @@ Optional CI/CD and S3 hosting can be added; see “Deployment” later.
 3. Start the dev server: run npm run dev.
 4. Open the local URL printed in your terminal.
 
-If you see a blank page or data fetch error, ensure **data.json** is inside **/src** (same folder as script.js and styles.css) and the fetch path in script.js uses ./data.json.
+If you see a blank page or data fetch error, ensure **data.json** is inside **/src/public** and the fetch path in script.js uses /data.json.
 
 ---
 
@@ -65,7 +74,7 @@ This single file controls everything:
 - name - full name as string
 - role - short role/tagline
 - aboutMe - a single-line intro (avoid very long sentences for layout)
-- profileImage - path or URL to your profile image (for Vite, place the image in src/assets and reference it as /assets/filename.ext)
+- profileImage - path or URL to your profile image (for Vite, place the image in src/public and reference it as /profile.jpg)
 - professionalSummary - paragraph shown in “Profile”
 - contact - object with email, location, github, linkedin, medium
 - skills - object of grouped arrays; group names become buttons and values are shown as a horizontal list when expanded
@@ -148,21 +157,111 @@ This single file controls everything:
 
 ## Deployment (S3 + CloudFront)
 
-High-level steps (no credentials in repo):
+### Quick Steps (For Users Who Just Want to Deploy)
+1. Run `npm install` and `npm run build`.
+2. Upload **only the contents of `dist/`** to your S3 bucket.
+3. Point a CloudFront distribution to that S3 bucket.
+4. Set **Custom Error Response** -> 403 & 404 -> `/index.html` -> HTTP 200.
+5. Done - your portfolio is live.
 
-1. Create an S3 bucket for static hosting (block public access disabled or use CloudFront OAI/Private).
-2. (Recommended) Put CloudFront in front of S3 with OAC/OAI, default root object index.html.
-3. Set appropriate cache behaviors for HTML vs assets.
-4. Upload the dist/ folder after each build.
+---
+
+### Deep Dive: Full Deployment Guide
+
+#### 1. Create S3 Bucket
+- Bucket name example: `your-portfolio-site`
+- Block Public Access: **ON** (recommended)
+- You do **not** enable "Static website hosting" when using CloudFront
+
+#### 2. Create CloudFront Distribution
+| Setting | Value |
+|---------|-------|
+| Origin type | S3 bucket |
+| Viewer protocol policy | Redirect HTTP -> HTTPS |
+| Default root object | `index.html` |
+| Cache policy | CachingOptimized (default is fine) |
+| Error responses | 403 + 404 -> `/index.html` -> 200 |
+
+#### 3. Upload Files
+```
+dist/
+  index.html
+  projects.html
+  assets/... (bundled js+css)
+  data.json
+  profile.jpg
+```
+Do **NOT** upload `src/`, `node_modules/`, or `public/` manually.
+
+---
+
+### Optional: Auto-Deploy via GitHub Actions
+
+This repo supports **OIDC-based GitHub -> AWS authentication**, so you deploy **without storing AWS secrets**.
+
+| GitHub Secret | Example | Required |
+|---------------|---------|----------|
+| `AWS_REGION` | `ap-south-1` | YES |
+| `S3_BUCKET_NAME` | `your-portfolio-site` | YES |
+| `AWS_DEPLOY_ROLE_ARN` | `arn:aws:iam::123456789012:role/GithubActionsS3DeployRole` | YES |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `XXXXXXXXXXXXX` | Optional (enables cache invalidation)|
+
+The workflow:
+```
+.github/workflows/deploy.yml
+```
+Builds site -> syncs S3 -> (optional) invalidates CloudFront cache.
+
+---
+
+### IAM Role (for OIDC Deploy)
+
+Create a role called `GithubActionsS3DeployRole` with:
+- **Trust entity:** `token.actions.githubusercontent.com`
+- **Action:** `sts:AssumeRoleWithWebIdentity`
+- **Optional condition:** restrict to `repo:username/reponame:ref:refs/heads/main`
+
+Required permissions:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:DeleteObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::your-bucket-name",
+        "arn:aws:s3:::your-bucket-name/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "cloudfront:CreateInvalidation",
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+---
+
+### Test Your Live Deployment
+- `https://your-distribution.cloudfront.net` loads homepage
+- `/projects.html` loads projects page
+- `https://your-distribution.cloudfront.net/data.json` returns JSON
+- Browser DevTools -> Network tab -> no 403/404 for assets
+
+If everything works, you're fully deployed (S3 + CloudFront).
+
 
 A GitHub Actions workflow can automate the build and S3 sync on pushes to main. See the “CI/CD” section below.
 
 ---
 
-## CI/CD (GitHub Actions) — Overview
+## CI/CD (GitHub Actions) - Overview
 
 - On push to main: node setup -> install -> build -> sync dist/ to S3.
-- Requires these repo secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, S3_BUCKET.
+- Requires these repo secrets: AWS_DEPLOY_ROLE_ARN, AWS_REGION, S3_BUCKET_NAME.
 - Optional: CLOUDFRONT_DISTRIBUTION_ID for cache invalidation.
 
 The workflow file lives at .github/workflows/deploy.yml. Add it when you’re ready (see the sample in this repo).
@@ -172,7 +271,7 @@ The workflow file lives at .github/workflows/deploy.yml. Add it when you’re re
 ## Maintenance
 
 - Add/edit content only in data.json - no need to touch HTML.
-- For profile image changes, update the file in src/assets and update profileImage.
+- For profile image changes, update the file in src/public/ and update profileImage.
 - Keep your projects list clean; show best 3-6 in the homepage carousel.
 
 ---
@@ -193,6 +292,17 @@ Possible improvements:
 - Add dark/light auto-switch button animation
 - Add "Download JSON Resume" export
 - Improve accessibility contrast rules
+
+### Fork & Customize
+
+This template is designed so anyone can clone it and turn it into their own portfolio:
+
+1. Fork the repo
+2. Update `public/data.json` with your content
+3. Replace `public/profile.jpg`
+4. (Optional) Edit colors/fonts in `styles.css`
+5. Deploy manually or enable GitHub Actions for automatic hosting
+
 
 ### Built By
 
