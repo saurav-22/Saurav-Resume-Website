@@ -1,4 +1,4 @@
-# Saurav Portfolio - Resume-Style Website (Vite + Tailwind)
+# Resume-Style Website (Vite + Tailwind)
 
 A fast, responsive, **resume-as-a-website** template. Built with Vite + Tailwind CSS, vanilla JS, Swiper.js (projects carousel), AOS (scroll animations), and Lucide icons. Content is driven by a single **data.json** file - no React or backend required.
 
