@@ -1,6 +1,6 @@
-/* ===============================
-   LOAD JSON DATA
-================================ */
+/* ===========================================
+   LOAD JSON FILE
+=========================================== */
 async function loadData() {
   const res = await fetch("./data.json");
   return await res.json();
@@ -26,73 +26,68 @@ loadData().then(data => {
 });
 
 
-/* ===============================
-   HERO
-================================ */
+/* ===========================================
+   HERO SECTION
+=========================================== */
 function renderHero(data) {
-  const imgEl = document.getElementById("profile-img");
-  imgEl.src = data.profileImage;
-
+  document.getElementById("profile-img").src = data.profileImage;
   document.getElementById("aboutMe").textContent = data.aboutMe;
+  document.getElementById("summary").textContent = data.professionalSummary;
+
   document.getElementById("email-text").textContent = data.contact.email;
   document.getElementById("location-text").textContent = data.contact.location;
 
-  // second row links
   document.getElementById("github-link").href = data.contact.github;
   document.getElementById("linkedin-link").href = data.contact.linkedin;
   document.getElementById("medium-link").href = data.contact.medium;
 
-  // fix lucide icons
+  document.getElementById("email-copy").onclick = () => {
+    navigator.clipboard.writeText(data.contact.email);
+    alert("Email copied: " + data.contact.email);
+  };
+
   lucide.createIcons();
 }
 
-function copyEmail(email) {
-  navigator.clipboard.writeText(email);
-  alert("Email copied: " + email);
-}
 
-
-/* ===============================
-   SUMMARY
-================================ */
+/* ===========================================
+   PROFILE SUMMARY
+=========================================== */
 function renderSummary(data) {
   document.getElementById("summary").textContent = data.professionalSummary;
 }
 
 
-/* ===============================
-   SKILLS (INLINE ACCORDION)
-================================ */
-let activeSkillIndex = null;
+/* ===========================================
+   SKILLS ACCORDION (FULL WIDTH ROW EXPAND)
+=========================================== */
+let activeSkill = null;
 
 function renderSkillsTabs(data) {
-  const tabContainer = document.getElementById("skills-tabs");
+  const grid = document.getElementById("skills-tabs");
   const groups = Object.keys(data.skills);
 
-  groups.forEach((group, index) => {
+  groups.forEach((name, index) => {
     const btn = document.createElement("button");
-    btn.innerHTML = `${group} <i class="arrow">→</i>`;
-    btn.onclick = () => toggleSkillGroup(data, group, index, groups.length);
-    tabContainer.appendChild(btn);
+    btn.innerHTML = `${name} <i class="arrow">→</i>`;
+    btn.onclick = () => toggleSkillRow(data, grid, groups, index);
+    grid.appendChild(btn);
   });
 }
 
-function toggleSkillGroup(data, group, index, total) {
-  const buttons = document.querySelectorAll("#skills-tabs button");
-  const expandSlot = document.getElementById("skills-expand-slot");
+function toggleSkillRow(data, grid, groups, index) {
+  const buttons = grid.querySelectorAll("button");
+  const slot = document.getElementById("skills-inline-slot");
 
-  // Close if clicked again
-  if (activeSkillIndex === index) {
-    expandSlot.innerHTML = "";
+  if (activeSkill === index) {
+    slot.style.display = "none";
     buttons[index].classList.remove("active");
     buttons[index].querySelector(".arrow").style.transform = "rotate(0deg)";
-    activeSkillIndex = null;
+    activeSkill = null;
     return;
   }
 
-  activeSkillIndex = index;
-
-  // Reset visual state
+  activeSkill = index;
   buttons.forEach(b => {
     b.classList.remove("active");
     b.querySelector(".arrow").style.transform = "rotate(0deg)";
@@ -101,47 +96,49 @@ function toggleSkillGroup(data, group, index, total) {
   buttons[index].classList.add("active");
   buttons[index].querySelector(".arrow").style.transform = "rotate(90deg)";
 
-  // Insert inline below row
-  const list = data.skills[group]
-    .map(i => `<li>${i}</li>`)
+  const groupName = groups[index];
+  const content = data.skills[groupName]
+    .map(item => `<li>${item}</li>`)
     .join("");
 
-  expandSlot.innerHTML = `
-    <div class="skill-expand-box" data-aos="fade-in">
-      <ul>${list}</ul>
-    </div>
-  `;
+  slot.innerHTML = `<ul>${content}</ul>`;
+
+  const row = Math.floor(index / 3);
+  const lastColIndex = Math.min((row + 1) * 3 - 1, buttons.length - 1);
+  buttons[lastColIndex].after(slot);
+
+  slot.style.display = "";
 }
 
 
-/* ===============================
-   EXPERIENCE
-================================ */
+
+/* ===========================================
+   EXPERIENCE SECTION
+=========================================== */
 function renderExperience(data) {
   const container = document.getElementById("experience-list");
 
-  data.experience.forEach((job, i) => {
+  data.experience.forEach((job, index) => {
     const div = document.createElement("div");
-    div.setAttribute("data-aos", "fade-up");
-    div.setAttribute("data-aos-delay", i * 80);
 
     div.innerHTML = `
-      <div class="flex justify-between items-center">
-        <span class="font-semibold">${job.role} — ${job.company}</span>
-        <span class="opacity-70 text-sm">${job.duration} 
-          <i data-lucide="chevron-down" id="exp-icon-${i}"></i>
-        </span>
+      <div class="exp-header">
+        <span class="exp-title">${job.role} — ${job.company}, <span class="exp-loc">${job.location}</span></span>
+
+      <span class="exp-meta">
+        ${job.duration}
+        <i data-lucide="chevron-down" id="exp-icon-${index}" class="exp-arrow"></i>
+      </span>
       </div>
-      <ul id="exp-${i}" class="hidden">
+
+      <ul id="exp-${index}" class="hidden">
         ${job.points.map(p => `<li>• ${p}</li>`).join("")}
       </ul>
     `;
 
     div.onclick = () => {
-      const list = document.getElementById(`exp-${i}`);
-      const icon = document.getElementById(`exp-icon-${i}`);
-      list.classList.toggle("hidden");
-      icon.classList.toggle("rotate-180");
+      document.getElementById(`exp-${index}`).classList.toggle("hidden");
+      document.getElementById(`exp-icon-${index}`).classList.toggle("rotate-180");
     };
 
     container.appendChild(div);
@@ -151,9 +148,10 @@ function renderExperience(data) {
 }
 
 
-/* ===============================
-   PROJECTS (HOME CAROUSEL)
-================================ */
+
+/* ===========================================
+   PROJECTS CAROUSEL (HOME)
+=========================================== */
 function renderCarousel(data) {
   const wrapper = document.getElementById("projects-carousel");
 
@@ -170,9 +168,10 @@ function renderCarousel(data) {
 
       <p class="tech-line">Tech: ${project.tech.join(", ")}</p>
 
-      <div class="project-cta"
-        onclick="openProjectLink('${project.github || project.medium}')">
-        Click here to view complete project details
+      <div class="project-cta">
+        <a class="link-cta" href="${project.github || project.medium}" target="_blank">
+          Click here to view complete project details
+        </a>
       </div>
     `;
 
@@ -183,21 +182,19 @@ function renderCarousel(data) {
     loop: true,
     autoplay: { delay: 3500 },
     navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
-    pagination: { el: ".swiper-pagination", clickable: true },
+    pagination: { el: ".swiper-pagination", clickable: true }
   });
 }
 
 
-/* ===============================
-   PROJECTS PAGE LIST VIEW
-================================ */
+/* ===========================================
+   PROJECTS PAGE LIST
+=========================================== */
 function renderProjectsList(data) {
   const list = document.getElementById("projects-list");
 
-  data.projects.forEach((project, i) => {
+  data.projects.forEach((project, index) => {
     const div = document.createElement("div");
-    div.setAttribute("data-aos", "fade-up");
-    div.setAttribute("data-aos-delay", i * 80);
 
     div.innerHTML = `
       <h4 class="text-lg font-semibold mb-2">${project.title}</h4>
@@ -208,23 +205,19 @@ function renderProjectsList(data) {
 
       <p class="tech-line">Tech: ${project.tech.join(", ")}</p>
 
-      <div class="project-cta" onclick="openProjectLink('${project.github || project.medium}')">
+      <a class="link-cta" href="${project.github || project.medium}" target="_blank">
         Click here to view complete project details
-      </div>
+      </a>
     `;
 
     list.appendChild(div);
   });
 }
 
-function openProjectLink(url) {
-  if (url) window.open(url, "_blank");
-}
 
-
-/* ===============================
+/* ===========================================
    THEME TOGGLE
-================================ */
+=========================================== */
 function initThemeToggle() {
   const toggle = document.getElementById("themeToggle");
   if (!toggle) return;
