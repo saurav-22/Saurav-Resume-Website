@@ -287,11 +287,19 @@ function initThemeToggle() {
   });
 }
 
-fetch("https://r6nlj7yrkf.execute-api.ap-south-1.amazonaws.com/view", {
-  method: "POST"
-})
-.then(res => res.json())
-.then(data => {
-  document.getElementById("view-count").innerText = data.views;
-})
-.catch(err => console.error("View counter error:", err));
+// Reads API URL from Vite environment variable (injected during build)
+const API_URL = import.meta.env.VITE_API_URL;
+
+// Only call API if environment variable exists (prevents increment in forks/dev)
+if (API_URL && typeof API_URL === "string") {
+  fetch(API_URL, { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
+      const el = document.getElementById("view-count");
+      if (el) el.textContent = data.views;
+    })
+    .catch(err => console.error("View counter fetch failed:", err));
+} else {
+  console.log("View counter disabled (API URL not configured)");
+}
+

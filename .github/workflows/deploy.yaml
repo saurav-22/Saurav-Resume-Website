@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Inject API URL into production env
+        run: echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env.production
+
       - name: Build project
         run: npm run build
 

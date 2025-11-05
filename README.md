@@ -14,15 +14,12 @@ A fast, responsive, **resume-as-a-website** template. Built with Vite + Tailwind
 
 ## Highlights
 
-- Vite + Tailwind = instant dev, tiny bundles
-- **Dark mode by default** with a simple light/dark toggle (persists via localStorage)
+- Vite + Tailwind = instant dev, tiny bundles, modern CSS
 - Content-first: edit a single **data.json** to update profile, skills, experience, projects, and links
-- Clean IA: Hero -> Profile -> Skills -> Experience -> Projects -> (Projects page)
-- **Skills accordion** expands full row beneath the clicked row (not a single column)
 - Projects **carousel** on homepage + **list page** with centered text links
-- Contact row **inside Hero** (two rows with precise alignment)
 - Fully responsive for desktop and mobile
 - Zero frameworks on top - just modern, accessible HTML + CSS + JS
+- Views Counter using AWS Lambda + DynamoDB + API Gateway
 
 ---
 
@@ -33,6 +30,7 @@ A fast, responsive, **resume-as-a-website** template. Built with Vite + Tailwind
 - AOS (Animate On Scroll)
 - Swiper.js (projects carousel)
 - Lucide (icons)
+- **AWS**: S3, CloudFront, API Gateway, Lambda, DynamoDB
 
 ---
 
@@ -45,7 +43,7 @@ A fast, responsive, **resume-as-a-website** template. Built with Vite + Tailwind
 - public/data.json - all portfolio content (profile, skills, experience, projects, contact)
 - public/profile.jpg - profile image
 
-Optional CI/CD and S3 hosting can be added; see “Deployment” later.
+Optional CI/CD and S3 hosting can be added; see "Deployment" later.
 
 ---
 
@@ -60,10 +58,13 @@ Optional CI/CD and S3 hosting can be added; see “Deployment” later.
 
 1. Clone or download this repository.
 2. Install dependencies: run npm install.
-3. Start the dev server: run npm run dev.
-4. Open the local URL printed in your terminal.
+3. Make a folder named `public` in root directory (where src is located) and put `data.json` & `profile.jpg` inside it.
+4. Start the dev server: run npm run dev.
+5. Open the local URL printed in your terminal.
 
-If you see a blank page or data fetch error, ensure **data.json** is inside **/src/public** and the fetch path in script.js uses /data.json.
+**NOTES**: 
+- The `public` folder is required in root directory only for local development and not for production build. 
+- For production, ensure `data.json` and `profile.jpg` are inside **/src/public** and the fetch path in script.js uses `/data.json`.
 
 ---
 
@@ -75,7 +76,7 @@ This single file controls everything:
 - role - short role/tagline
 - aboutMe - a single-line intro (avoid very long sentences for layout)
 - profileImage - path or URL to your profile image (for Vite, place the image in src/public and reference it as /profile.jpg)
-- professionalSummary - paragraph shown in “Profile”
+- professionalSummary - paragraph shown in "Profile" section
 - contact - object with email, location, github, linkedin, medium
 - skills - object of grouped arrays; group names become buttons and values are shown as a horizontal list when expanded
 - experience - array of jobs (role, company, duration, location, points)
@@ -99,7 +100,7 @@ This single file controls everything:
 
 ### Profile
 
-- Titled “PROFILE” (not Professional Summary). Short paragraph from professionalSummary.
+- Titled "PROFILE" (not Professional Summary). Short paragraph from professionalSummary.
 
 ### Skills (Accordion)
 
@@ -120,30 +121,15 @@ This single file controls everything:
 - Projects page: one-column stack of project cards; the same centered underlined link text per card; no modal.
 - At the bottom of the homepage projects section there’s a small centered link: “Click here to get your own portfolio website” that points to the repository.
 
-### Theme
-
-- Dark by default; light/dark toggle persists using localStorage.
-
----
-
-## Customization
-
-### Colors & Accents
-
-- Accent gradient and contrasts are defined in styles.css using Tailwind utilities. Update the gradient in the body background if you prefer a different palette.
-
-### Fonts
-
-- System sans by default. If you want a Google Font, include it in index.html and apply it via body or specific classes in styles.css.
-
-### Profile Image
-
-- Place image in src/assets and set profileImage to /assets/your-file.ext.
-- Use a square or near-square image for best results.
-
-### Skills Layout
-
-- If your About or Name/Role wrap too soon, widen .hero-left to md:w-3/4 (in styles.css) and shrink .hero-right to md:w-1/4.
+### Views Counter
+- Increments a global `views` counter every time the site loads
+- Stores the value in **Amazon DynamoDB** (on‑demand, pay‑per‑request)
+- Uses **AWS Lambda (Python)** to atomically update the counter
+- Exposes a public HTTPS endpoint via **API Gateway (POST only)**
+- Frontend fetches the value and displays it live on the page
+- Protected with API Gateway rate‑limit (10 req/min per IP)
+- The API URL is injected during build using a GitHub Secret called `VITE_API_URL`.  
+- The counter does **not** increment during local development or in unconfigured forks.
 
 ---
 
@@ -205,6 +191,7 @@ This repo supports **OIDC-based GitHub -> AWS authentication**, so you deploy **
 | `S3_BUCKET_NAME` | `your-portfolio-site` | YES |
 | `AWS_DEPLOY_ROLE_ARN` | `arn:aws:iam::123456789012:role/GithubActionsS3DeployRole` | YES |
 | `CLOUDFRONT_DISTRIBUTION_ID` | `XXXXXXXXXXXXX` | Optional (enables cache invalidation)|
+| `VITE_API_URL` | `https://xxxxx.execute-api.ap-south-1.amazonaws.com/view` | YES |
 
 The workflow:
 ```
@@ -242,6 +229,90 @@ Required permissions:
   ]
 }
 ```
+---
+
+### Setup Viewer Counter (If Desired)
+
+- **DynamoDB Table:**
+  - Table name: `pageViews`
+  - Primary key: `metric` (String)
+  - Billing mode: On-Demand
+  - No sort key, no secondary indexes, no streams, no GSIs
+  - After table is created, add an item:
+    - `metric`: `views`
+    - `count`: `0` (Number)
+
+- **IAM Role for Lambda:**
+  - Create role `LambdaDynamoDBRole`
+  - Attach policy with:
+  ```json
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "dynamodb:UpdateItem",
+          "dynamodb:GetItem"
+        ],
+        "Resource": "arn:aws:dynamodb:your-region:YOUR_ACCOUNT_ID:table/pageViews"
+      }
+    ]
+  }
+  ```
+  - Also attach AWSLambdaBasicExecutionRole managed policy.
+
+- **Lambda Function:**
+  - Runtime: Python 3.12
+  - Role: `LambdaDynamoDBRole`
+  - Code:
+```python
+import boto3
+import json
+
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table("pageViews")
+
+def lambda_handler(event, context):
+    # increment counter atomically
+    response = table.update_item(
+        Key={"metric": "views"},
+        UpdateExpression="ADD #c :inc",
+        ExpressionAttributeNames={"#c": "count"},
+        ExpressionAttributeValues={":inc": 1},
+        ReturnValues="UPDATED_NEW"
+    )
+    
+    new_value = response["Attributes"]["count"]
+    
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"  # will tighten later
+        },
+        "body": json.dumps({"views": int(new_value)})
+    }
+  ```
+- API Gateway:
+  - Create HTTP API (Not REST API)
+  - Integration: Lambda Function (your function)
+  - Route:
+    - Method: POST
+    - Endpoint: `/view`
+  - CORS:
+    - Allow Origins: `*` (can be tightened later)
+    - Allow Methods: `POST`
+  - Throttling:
+    - Rate limit: 10 requests/second
+    - Burst limit: 2 requests
+  - Deploy API and note the invoke URL.
+
+- Optional (Recommended before going Live)
+  - Replace Wildcard CORS with your domain only inside Lambda function:
+```python
+"Access-Control-Allow-Origin": "https://YOUR_CLOUDFRONT_DOMAIN"
+```
 
 ---
 
@@ -252,19 +323,6 @@ Required permissions:
 - Browser DevTools -> Network tab -> no 403/404 for assets
 
 If everything works, you're fully deployed (S3 + CloudFront).
-
-
-A GitHub Actions workflow can automate the build and S3 sync on pushes to main. See the “CI/CD” section below.
-
----
-
-## CI/CD (GitHub Actions) - Overview
-
-- On push to main: node setup -> install -> build -> sync dist/ to S3.
-- Requires these repo secrets: AWS_DEPLOY_ROLE_ARN, AWS_REGION, S3_BUCKET_NAME.
-- Optional: CLOUDFRONT_DISTRIBUTION_ID for cache invalidation.
-
-The workflow file lives at .github/workflows/deploy.yml. Add it when you’re ready (see the sample in this repo).
 
 ---
 
@@ -309,6 +367,7 @@ This template is designed so anyone can clone it and turn it into their own port
 - **Saurav Singh (QA / DevOps Engineer)**
 - LinkedIn: https://www.linkedin.com/in/sauravqa/
 - GitHub: https://github.com/saurav-22
+- Medium: https://medium.com/@sauravsingh8888
 
 ### Support
 If this project helps you build your portfolio, please consider starring ⭐ the repository on GitHub - it helps the project grow and shows demand.
