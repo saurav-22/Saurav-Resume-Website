@@ -21,6 +21,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+      
+      - name: Debug working directory
+        run: |
+          echo "PWD: $(pwd)"
+          ls -al
+          echo "--- checking for vite.config.js ---"
+          ls -al vite.config.js
 
       - name: Install dependencies
         working-directory: ./
@@ -42,12 +49,7 @@ jobs:
 
       - name: Sync build output to S3
         run: |
-          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} \
-            --cache-control "max-age=31536000,public" \
-            --exclude "*.html"
-          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} \
-            --cache-control "max-age=0,no-cache,no-store,must-revalidate" \
-            --include "*.html"
+          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
       - name: Invalidate CloudFront cache (optional)
         run: |
