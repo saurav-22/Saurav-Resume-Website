@@ -233,6 +233,15 @@ input:checked + .slider::before {
   @apply px-5 py-2 rounded-lg bg-white/30 backdrop-blur-md hover:bg-white/40 transition text-sm font-semibold; 
 }
 
+/* Prevent text overflow inside project carousel cards */
+.list-disc li,
+.tech-line,
+.link-cta {
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+
 /* Underlined CTA link */
 .project-cta { 
   text-align: center; 
@@ -302,4 +311,46 @@ input:checked + .slider::before {
 }
 .dark #skills-inline-slot {
   @apply bg-black/30 border-white/10;
+}
+
+/* === Skills Button Wrapping & Mobile Fix === */
+.skill-btn {
+  @apply flex items-center justify-between px-4 py-3 rounded-xl font-medium
+         bg-gradient-to-r from-sky-500/20 to-blue-600/30
+         dark:from-blue-400/20 dark:to-blue-700/30
+         border border-white/10 text-sm sm:text-xs
+         whitespace-normal break-words;
+}
+
+.skill-btn span {
+  @apply flex-1 text-left leading-snug;
+}
+
+.skill-btn svg {
+  @apply w-4 h-4 transition-transform duration-300;
+}
+
+/* Rotate arrow on expand */
+.skill-btn.active svg {
+  transform: rotate(180deg);
+}
+
+/* Expanded skill list container */
+#skills-inline-slot {
+  @apply w-full bg-white/10 dark:bg-black/30 border border-white/10 p-4 rounded-xl mt-3;
+}
+
+/* Mobile-only layout adjustments */
+@media (max-width: 640px) {
+  #skills-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-card {
+    @apply px-5 py-4;
+  }
+
+  .project-desc {
+    @apply text-sm leading-tight;
+  }
 }

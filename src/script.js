@@ -63,51 +63,42 @@ function renderSummary(data) {
 =========================================== */
 let activeSkill = null;
 
-function renderSkillsTabs(data) {
-  const grid = document.getElementById("skills-tabs");
-  const groups = Object.keys(data.skills);
-
-  groups.forEach((name, index) => {
-    const btn = document.createElement("button");
-    btn.innerHTML = `${name} <i class="arrow">→</i>`;
-    btn.onclick = () => toggleSkillRow(data, grid, groups, index);
-    grid.appendChild(btn);
-  });
-}
-
-function toggleSkillRow(data, grid, groups, index) {
-  const buttons = grid.querySelectorAll("button");
+// ===== Render Skills Buttons with Chevron Toggle =====
+function renderSkills(skills) {
+  const btnContainer = document.getElementById("skills-buttons");
   const slot = document.getElementById("skills-inline-slot");
+  let activeIndex = null;
 
-  if (activeSkill === index) {
-    slot.style.display = "none";
-    buttons[index].classList.remove("active");
-    buttons[index].querySelector(".arrow").style.transform = "rotate(0deg)";
-    activeSkill = null;
-    return;
-  }
+  skills.forEach((skill, index) => {
+    const btn = document.createElement("button");
+    btn.className = "skill-btn";
+    btn.innerHTML = `
+      <span>${skill.title}</span>
+      <i data-lucide="chevron-down"></i>
+    `;
 
-  activeSkill = index;
-  buttons.forEach(b => {
-    b.classList.remove("active");
-    b.querySelector(".arrow").style.transform = "rotate(0deg)";
+    btn.addEventListener("click", () => {
+      if (activeIndex === index) {
+        slot.innerHTML = "";
+        btn.classList.remove("active");
+        activeIndex = null;
+      } else {
+        slot.innerHTML = `
+          <ul class="list-disc pl-5 mt-2 space-y-1 text-sm">
+            ${skill.items.map(i => `<li>${i}</li>`).join("")}
+          </ul>
+        `;
+        [...document.querySelectorAll(".skill-btn")].forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeIndex = index;
+        lucide.createIcons();
+      }
+    });
+
+    btnContainer.appendChild(btn);
   });
 
-  buttons[index].classList.add("active");
-  buttons[index].querySelector(".arrow").style.transform = "rotate(90deg)";
-
-  const groupName = groups[index];
-  const content = data.skills[groupName]
-    .map(item => `<li>${item}</li>`)
-    .join("");
-
-  slot.innerHTML = `<ul>${content}</ul>`;
-
-  const row = Math.floor(index / 3);
-  const lastColIndex = Math.min((row + 1) * 3 - 1, buttons.length - 1);
-  buttons[lastColIndex].after(slot);
-
-  slot.style.display = "";
+  lucide.createIcons();
 }
 
 
@@ -162,14 +153,17 @@ function renderCarousel(data) {
     slide.innerHTML = `
       <h4 class="text-lg font-semibold mb-3">${project.title}</h4>
 
-      <ul class="list-disc ml-5 mb-3 text-sm">
+      <ul class="list-disc ml-5 mb-3 text-sm break-words whitespace-normal leading-snug">
         ${project.highlights.map(h => `<li>${h}</li>`).join("")}
       </ul>
 
-      <p class="tech-line">Tech: ${project.tech.join(", ")}</p>
+      <p class="tech-line break-words whitespace-normal leading-snug text-sm sm:text-base">
+        Tech: ${project.tech.join(", ")}
+      </p>
+
 
       <div class="project-cta">
-        <a class="link-cta" href="${project.github || project.medium}" target="_blank">
+        <a class="link-cta break-words whitespace-normal" href="${project.github || project.medium}" target="_blank">
           Click here to view complete project details
         </a>
       </div>
