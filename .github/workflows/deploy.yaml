@@ -30,11 +30,11 @@ jobs:
       #  working-directory: ./
       #  run: echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > src/.env.production
 
-      - name: Debug env file
-        run: |
-          echo "Current directory: $(pwd)"
-          ls -la src/.env.production
-          cat src/.env.production
+      #- name: Debug env file
+      #  run: |
+      #    echo "Current directory: $(pwd)"
+      #    ls -la src/.env.production
+      #    cat src/.env.production
 
       - name: Build project
         working-directory: ./
