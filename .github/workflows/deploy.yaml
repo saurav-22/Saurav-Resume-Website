@@ -21,13 +21,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-      
-      #- name: Debug working directory
-       # run: |
-        #  echo "PWD: $(pwd)"
-         # ls -al
-          #echo "--- checking for vite.config.js ---"
-          #ls -al vite.config.js
 
       - name: Install dependencies
         working-directory: ./
@@ -35,7 +28,14 @@ jobs:
 
       - name: Inject API URL into production env
         working-directory: ./
-        run: echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env.production
+        run: echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > src/.env.production
+
+      - name: Debug - Check env file
+        run: |
+          echo "Contents of .env.production:"
+          cat src/.env.production || echo "File not found in src/"
+          echo "Contents of root .env.production:"
+          cat .env.production || echo "File not found in root"        
 
       - name: Build project
         working-directory: ./
