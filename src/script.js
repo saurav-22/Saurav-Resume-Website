@@ -13,7 +13,7 @@ loadData().then(data => {
   if (isHome) {
     renderHero(data);
     renderSummary(data);
-    renderSkillsTabs(data);
+    renderSkills(data);
     renderExperience(data);
     renderCarousel(data);
   }
