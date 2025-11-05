@@ -39,7 +39,7 @@ jobs:
 
       - name: Build project
         working-directory: ./
-        run: npm run build
+        run: npm run build -- --mode production
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
