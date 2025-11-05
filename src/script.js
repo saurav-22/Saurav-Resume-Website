@@ -286,3 +286,12 @@ function initThemeToggle() {
     localStorage.theme = isLight ? "light" : "dark";
   });
 }
+
+fetch("https://r6nlj7yrkf.execute-api.ap-south-1.amazonaws.com/view", {
+  method: "POST"
+})
+.then(res => res.json())
+.then(data => {
+  document.getElementById("view-count").innerText = data.views;
+})
+.catch(err => console.error("View counter error:", err));
