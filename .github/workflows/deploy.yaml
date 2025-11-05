@@ -26,7 +26,12 @@ jobs:
         run: npm install
 
       - name: Inject API URL into production env
-        run: echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env.production
+        working-directory: ${{ github.workspace }}
+        run: 
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env.production
+          cat .env.production
+      - name: List workspace before build
+        run: ls -al
 
       - name: Build project
         run: npm run build
