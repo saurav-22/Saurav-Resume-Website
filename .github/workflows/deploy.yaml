@@ -23,17 +23,15 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
+        working-directory: ./
         run: npm install
 
       - name: Inject API URL into production env
-        working-directory: ${{ github.workspace }}
-        run: 
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env.production
-          cat .env.production
-      - name: List workspace before build
-        run: ls -al
+        working-directory: ./
+        run: echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env.production
 
       - name: Build project
+        working-directory: ./
         run: npm run build
 
       - name: Configure AWS credentials
