@@ -81,12 +81,14 @@ function currentColCount() {
   return window.matchMedia("(max-width: 640px)").matches ? 2 : 3;
 }
 
-function renderSkills(skillsInput) {
+function renderSkills(data) {
+// Accept either the whole data object or the skills payload directly
+  const source = (data && data.skills) ? data.skills : data;
   const btnContainer = document.getElementById("skills-buttons");
   const slot = document.getElementById("skills-inline-slot");
   if (!btnContainer || !slot) return;
 
-  const skills = normalizeSkills(skillsInput); // <-- robust to object/array
+  const skills = normalizeSkills(source); // <= now always correct
   btnContainer.innerHTML = "";
   slot.innerHTML = "";
   slot.style.display = "none";
@@ -162,9 +164,6 @@ function renderSkills(skillsInput) {
     }, 120);
   });
 }
-
-
-
 
 /* ===========================================
    EXPERIENCE SECTION

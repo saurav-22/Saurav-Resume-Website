@@ -354,3 +354,30 @@ input:checked + .slider::before {
     @apply text-sm leading-tight;
   }
 }
+
+/* Keep text inside carousel cards on small screens */
+.swiper-slide,
+.swiper-slide * {
+  box-sizing: border-box;
+}
+
+.swiper-slide p,
+.swiper-slide li,
+.swiper-slide .tech-line,
+.swiper-slide .link-cta {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* Mobile-specific spacing so arrows don't crowd text */
+@media (max-width: 640px) {
+  .swiper-slide {
+    padding-left: 2.75rem;   /* ~44px, clears prev arrow */
+    padding-right: 2.0rem;   /* breathing room on the right */
+  }
+  .swiper-button-next,
+  .swiper-button-prev {
+    transform: scale(0.9);
+  }
+}
