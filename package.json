@@ -4,7 +4,7 @@
   "description": "JSON-driven resume portfolio website with Tailwind, Swiper, AOS, and AWS S3 deploy support.",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --emptyOutDir",
+    "build": "vite build --emptyOutDir --mode production",
     "preview": "vite preview"
   },
   "dependencies": {

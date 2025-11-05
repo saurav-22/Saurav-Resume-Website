@@ -22,12 +22,12 @@ jobs:
         with:
           node-version: 18
       
-      - name: Debug working directory
-        run: |
-          echo "PWD: $(pwd)"
-          ls -al
-          echo "--- checking for vite.config.js ---"
-          ls -al vite.config.js
+      #- name: Debug working directory
+       # run: |
+        #  echo "PWD: $(pwd)"
+         # ls -al
+          #echo "--- checking for vite.config.js ---"
+          #ls -al vite.config.js
 
       - name: Install dependencies
         working-directory: ./
@@ -39,7 +39,7 @@ jobs:
 
       - name: Build project
         working-directory: ./
-        run: npm run build -- --mode production
+        run: npm run build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
