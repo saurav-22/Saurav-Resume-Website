@@ -61,14 +61,39 @@ function renderSummary(data) {
 /* ===========================================
    SKILLS ACCORDION (FULL WIDTH ROW EXPAND)
 =========================================== */
-let activeSkill = null;
+function normalizeSkills(input) {
+  // Accepts { Group: ["a","b"] } OR [{ title, items }]
+  if (Array.isArray(input)) {
+    // Already array of { title, items } → verify shape
+    return input.map(s => {
+      if (s && Array.isArray(s.items) && typeof s.title === "string") return s;
+      // If someone passed ["a","b"] by mistake, wrap it
+      if (Array.isArray(s)) return { title: "Skills", items: s };
+      return { title: String(s?.title ?? "Skills"), items: Array.isArray(s?.items) ? s.items : [] };
+    });
+  }
+  // Object map → convert to array
+  return Object.keys(input || {}).map(k => ({ title: k, items: Array.isArray(input[k]) ? input[k] : [] }));
+}
 
-// ===== Render Skills Buttons with Chevron Toggle =====
-function renderSkills(skills) {
+function currentColCount() {
+  // ≤640px → 2 columns (your M2 choice), otherwise 3
+  return window.matchMedia("(max-width: 640px)").matches ? 2 : 3;
+}
+
+function renderSkills(skillsInput) {
   const btnContainer = document.getElementById("skills-buttons");
   const slot = document.getElementById("skills-inline-slot");
+  if (!btnContainer || !slot) return;
+
+  const skills = normalizeSkills(skillsInput); // <-- robust to object/array
+  btnContainer.innerHTML = "";
+  slot.innerHTML = "";
+  slot.style.display = "none";
+
   let activeIndex = null;
 
+  // Create all buttons
   skills.forEach((skill, index) => {
     const btn = document.createElement("button");
     btn.className = "skill-btn";
@@ -78,28 +103,66 @@ function renderSkills(skills) {
     `;
 
     btn.addEventListener("click", () => {
+      const buttons = [...btnContainer.querySelectorAll(".skill-btn")];
+
+      // Close if clicking the same open one
       if (activeIndex === index) {
+        slot.style.display = "none";
         slot.innerHTML = "";
-        btn.classList.remove("active");
+        buttons[index].classList.remove("active");
         activeIndex = null;
-      } else {
-        slot.innerHTML = `
-          <ul class="list-disc pl-5 mt-2 space-y-1 text-sm">
-            ${skill.items.map(i => `<li>${i}</li>`).join("")}
-          </ul>
-        `;
-        [...document.querySelectorAll(".skill-btn")].forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        activeIndex = index;
-        lucide.createIcons();
+        return;
       }
+
+      // Activate this button, deactivate others
+      buttons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeIndex = index;
+
+      // Build list HTML (horizontal, wraps gracefully)
+      const listHTML = (skill.items || [])
+        .map(i => `<li>${i}</li>`)
+        .join("");
+
+      slot.innerHTML = `
+        <ul class="flex flex-wrap gap-x-3 gap-y-1 text-sm md:text-base break-words">
+          ${listHTML}
+        </ul>
+      `;
+
+      // Insert slot below the correct row
+      const cols = currentColCount();              // 2 on mobile, 3 on desktop
+      const row = Math.floor(index / cols);
+      const lastIdxInRow = Math.min((row + 1) * cols - 1, buttons.length - 1);
+      buttons[lastIdxInRow].after(slot);
+      slot.style.display = "";
+
+      // Refresh icons (ensures chevron renders)
+      lucide.createIcons();
     });
 
     btnContainer.appendChild(btn);
   });
 
+  // Initial icon render
   lucide.createIcons();
+
+  // Re-position the open slot on resize so it stays under the correct row
+  let resizeTO;
+  window.addEventListener("resize", () => {
+    if (activeIndex === null) return;
+    clearTimeout(resizeTO);
+    resizeTO = setTimeout(() => {
+      const buttons = [...btnContainer.querySelectorAll(".skill-btn")];
+      if (buttons.length === 0) return;
+      const cols = currentColCount();
+      const row = Math.floor(activeIndex / cols);
+      const lastIdxInRow = Math.min((row + 1) * cols - 1, buttons.length - 1);
+      buttons[lastIdxInRow].after(slot);
+    }, 120);
+  });
 }
+
 
 
 
