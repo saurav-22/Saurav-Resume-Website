@@ -289,7 +289,6 @@ function initThemeToggle() {
 
 document.addEventListener("DOMContentLoaded", () => {
   const API_URL = import.meta.env.VITE_API_URL;
-
   if (API_URL) {
     fetch(API_URL, { method: "POST" })
       .then(res => res.json())
